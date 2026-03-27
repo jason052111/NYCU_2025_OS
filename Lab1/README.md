@@ -1,7 +1,5 @@
 # Assignment I: Compiling a Custom Linux Kernel & Implementing New System Calls
 
-**Author:** Student ID: 314551147
-
 ---
 
 ## 1. Compiling a Custom Linux Kernel
