@@ -1,7 +1,5 @@
 # Assignment II: Scheduling Policy Demonstration Program
 
-**Author:** Student ID: 314551147
-
 ---
 
 ## 1. Implementation
