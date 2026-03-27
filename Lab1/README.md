@@ -4,15 +4,7 @@
 
 ## 1. Compiling a Custom Linux Kernel
 
-### 1.1 Screenshots
-
-![Output of uname -a && cat /proc/version command](uname.png)
-*Figure 1: Output of `uname -a` && `cat /proc/version` command*
-
-![Output of make kernelrelease command](make_kernelrelease.png)
-*Figure 2: Output of `make kernelrelease` command*
-
-### 1.2 Steps Performed
+### 1.1 Steps Performed
 
 #### Set Up Cross Compilation
 ```bash
@@ -85,21 +77,7 @@ Docker is used to provide a consistent and reproducible build environment for th
 
 ## 3. Implementing New System Calls
 
-### 3.1 Screenshots
-
-![Output of test_revstr command](test_revstr.png)
-*Figure 3: Output of `test_revstr` command*
-
-![Kernel dmesg output of sys_revstr](revstr_dmesg.png)
-*Figure 4: Kernel dmesg output of `sys_revstr`*
-
-![Output of test_tempbuf command](test_tempbuf.png)
-*Figure 5: Output of `test_tempbuf` command*
-
-![Kernel dmesg output of sys_tempbuf](tempbuf_dmesg.png)
-*Figure 6: Kernel dmesg output of `sys_tempbuf`*
-
-### 3.2 How System Calls Were Added
+### 3.1 How System Calls Were Added
 
 #### 1. Register System Call Numbers
 **File:** `arch/riscv/include/uapi/asm/unistd.h`
@@ -134,7 +112,7 @@ Files added to: `linux/kernel/`
 * `sys_revstr.c`
 * `sys_tempbuf.c`
 
-### 3.3 System Call Behavior
+### 3.2 System Call Behavior
 
 #### Details of `sys_revstr`
 The `sys_revstr` system call is responsible for reversing a user-provided string within the kernel. It takes two parameters: a user pointer to a character buffer (`char __user *str`) and its length (`size_t n`). Because the kernel cannot directly dereference user pointers, the function first allocates a temporary kernel buffer using `kmalloc()` and safely copies the string from user space via `copy_from_user()`. This ensures that kernel memory accesses remain valid and protected from faults.
