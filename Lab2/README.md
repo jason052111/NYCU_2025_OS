@@ -1,5 +1,7 @@
 # Assignment II: Scheduling Policy Demonstration Program
 
+**Author:** Student ID: 314551147
+
 ---
 
 ## 1. Implementation
@@ -28,7 +30,9 @@ The `busy_wait()` function implements CPU-bound busy waiting while excluding the
 
 Because `CLOCK_THREAD_CPUTIME_ID` only advances when the thread is actually executing on the CPU, any time interval during which the thread is preempted by another thread is not counted towards the busy-wait duration. As a result, when we measure the program using the `time` command, the total CPU time (user plus system) is approximately:
 
-$$ \text{time\_wait} \times \text{num\_threads} \times 3 $$
+```text
+time_wait * num_threads * 3
+```
 
 which matches the expected behavior: each of the `num_threads` threads performs three busy-wait iterations of length `time_wait`.
 
@@ -147,13 +151,15 @@ Thread 2 is running
 
 ---
 
-## 3. Implementation of $n$-second Busy Waiting
+## 3. Implementation of n-second Busy Waiting
 
-To implement an $n$-second busy waiting for each thread, I wrote a function `busy_wait(double seconds)` that measures *per-thread CPU time* instead of wall-clock time. At the beginning of the function, I call `clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start)` to record the CPU time already consumed by the current thread. Then I enter a `while` loop and repeatedly call `clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now)`, compute the elapsed CPU time:
+To implement an n-second busy waiting for each thread, I wrote a function `busy_wait(double seconds)` that measures *per-thread CPU time* instead of wall-clock time. At the beginning of the function, I call `clock_gettime(CLOCK_THREAD_CPUTIME_ID, &start)` to record the CPU time already consumed by the current thread. Then I enter a `while` loop and repeatedly call `clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now)`, compute the elapsed CPU time:
 
-$$ \text{elapsed} = (\text{now.tv\_sec} - \text{start.tv\_sec}) + (\text{now.tv\_nsec} - \text{start.tv\_nsec}) / 1e9 $$
+```c
+elapsed = (now.tv_sec - start.tv_sec) + (now.tv_nsec - start.tv_nsec) / 1e9;
+```
 
-and exit the loop once `elapsed >= seconds`. Since `CLOCK_THREAD_CPUTIME_ID` only increases when the thread is actually running on the CPU, any time during which the thread is preempted by another thread is automatically excluded from the busy-wait duration. This satisfies the requirement that the $n$-second busy waiting should not count preempted time.
+and exit the loop once `elapsed >= seconds`. Since `CLOCK_THREAD_CPUTIME_ID` only increases when the thread is actually running on the CPU, any time during which the thread is preempted by another thread is automatically excluded from the busy-wait duration. This satisfies the requirement that the n-second busy waiting should not count preempted time.
 
 I experimented with two variants of this loop. In the simpler version, the loop only calls `clock_gettime` and checks the elapsed time. In this case, when measuring the whole program with the `time` command, I obtained:
 
@@ -171,13 +177,13 @@ real    0m 6.02s
 user    0m 0.43s
 sys     0m 5.58s
 ```
-The total CPU time (`user + sys`) is still about six seconds, which matches the expected value $0.5 \times 4 \times 3$, but a larger fraction is now counted as *user* time because part of the busy waiting is spent executing user-space instructions. This shows that the implementation correctly performs CPU-bound busy waiting for $n$ seconds of thread CPU time, while the split between user and system time depends on how much work is done in user space versus kernel space inside the loop.
+The total CPU time (`user + sys`) is still about six seconds, which matches the expected value `0.5 * 4 * 3`, but a larger fraction is now counted as *user* time because part of the busy waiting is spent executing user-space instructions. This shows that the implementation correctly performs CPU-bound busy waiting for n seconds of thread CPU time, while the split between user and system time depends on how much work is done in user space versus kernel space inside the loop.
 
 ---
 
 ## 4. Effect of `kernel.sched_rt_runtime_us`
 
-Linux provides a real-time bandwidth control mechanism for `SCHED_FIFO` and `SCHED_RR` tasks. The parameter `/proc/sys/kernel/sched_rt_runtime_us` specifies, in microseconds, how much CPU time all real-time tasks on a CPU are allowed to consume during each real-time period. The length of this period is given by `/proc/sys/kernel/sched_rt_period_us`, which is typically `1000000` $\mu$s (1 second) by default.
+Linux provides a real-time bandwidth control mechanism for `SCHED_FIFO` and `SCHED_RR` tasks. The parameter `/proc/sys/kernel/sched_rt_runtime_us` specifies, in microseconds, how much CPU time all real-time tasks on a CPU are allowed to consume during each real-time period. The length of this period is given by `/proc/sys/kernel/sched_rt_period_us`, which is typically `1000000` μs (1 second) by default.
 
 Intuitively, `sched_rt_runtime_us` defines an upper bound on the CPU bandwidth that real-time tasks may use within each period. For example, if `sched_rt_period_us` is 1 second and `kernel.sched_rt_runtime_us` is set to `500000`, then real-time tasks on that CPU may use at most 0.5 seconds of CPU time in each 1-second period (i.e., at most 50% CPU bandwidth), and the remaining 50% of the CPU time is reserved for normal CFS tasks. Similarly, a value of `950000` allows real-time tasks to use up to 95% of the CPU time in each period, leaving only about 5% for non-real-time tasks. If the value is set to `1000000` and the period is also 1 second, then real-time tasks are allowed to use essentially all of the CPU time in each period, and CFS tasks no longer have a guaranteed minimum share.
 
