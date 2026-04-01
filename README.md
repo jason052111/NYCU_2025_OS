@@ -1,7 +1,4 @@
-# Course Summary: Operating Systems (Assignment I to III)
-
-**Group:** 9  
-**Student ID:** 314551147  
+# Course Summary: Operating Systems
 
 ---
 
