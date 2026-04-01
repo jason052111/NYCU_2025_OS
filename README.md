@@ -1,59 +1,49 @@
-# Linux Kernel Programming & System Implementation
-> **Course Project Portfolio** > This project covers three major domains of Linux kernel development: Kernel compilation and architectural understanding, system call implementation with scheduling analysis, and kernel module (driver) development.
+# Course Summary: Operating Systems (Assignment I to III)
+
+**Group:** 9  
+**Student ID:** 314551147  
 
 ---
 
-## 🎓 Key Learning Outcomes
-
-Through these hands-on assignments, I have mastered the following critical low-level technologies:
-
-* **Kernel Infrastructure**: Gained proficiency in setting up consistent **RISC-V cross-compilation** environments using Docker and testing kernel images via the **QEMU** emulator.
-* **System Call Mechanisms**: Deepened my understanding of the isolation between **User Space** and **Kernel Space**, including registering new syscalls and implementing security checks like `copy_from_user` and `copy_to_user`.
-* **Linux Scheduling Logic**: Analyzed behavioral differences between the **CFS (Completely Fair Scheduler)** and **Real-time (SCHED_FIFO)** schedulers, specifically focusing on CPU affinity and priority preemption.
-* **Kernel Module Development**: Mastered the architecture of **Character Device Drivers**, covering major/minor number management, `file_operations` implementation, concurrency control via **Mutexes**, and kernel memory management.
+## 1. Course Overview
+Throughout this course, we explored the deep internals of the Linux Operating System, bridging the gap between user-space applications and kernel-space management. The hands-on assignments provided a comprehensive journey from configuring and cross-compiling a custom RISC-V Linux kernel, to manipulating thread scheduling policies, and finally developing and registering a custom character device driver as a Loadable Kernel Module (LKM).
 
 ---
 
-## 🛠 Project Scope & Implementation Details
+## 2. Key Learnings by Module
 
-### I. Custom Linux Kernel & System Calls
-Constructed a custom kernel for the RISC-V architecture and extended its functionality with new system calls.
+### 2.1 Kernel Compilation & System Calls (Assignment I)
+* **Cross-Compilation & Emulation:** Mastered the process of configuring (`defconfig`), modifying, and cross-compiling the Linux kernel for the RISC-V architecture. Successfully deployed and tested the custom kernel using QEMU with a minimal `initramfs`.
+* **System Call Implementation:** Learned the complete lifecycle of adding new system calls (`sys_revstr`, `sys_tempbuf`) to the Linux kernel, including updating syscall tables (`unistd.h`, `syscalls.h`) and modifying kernel Makefiles.
+* **Safe User-Kernel Data Transfer:** Gained hands-on experience with `copy_from_user()` and `copy_to_user()` to securely pass data across the user-kernel boundary without causing kernel panics.
+* **Kernel Data Structures:** Utilized kernel-specific memory allocation (`kmalloc`/`kfree`) and manipulated the kernel's built-in doubly linked list (`struct list_head`) for dynamic state management.
 
-* **Technologies**: RISC-V Toolchain, QEMU, `unistd.h` syscall table modification.
-* **Implemented Syscalls**:
-    1.  `sys_revstr`: Reverses a string at the kernel level, utilizing kernel dynamic memory allocation (`kmalloc/kfree`).
-    2.  `sys_tempbuf`: Implements a kernel-level dynamic linked list (`struct list_head`) to provide a cross-process data caching mechanism.
-* **Key Concept**: Understood why `-static` linking is mandatory for minimal environments lacking dynamic loaders.
+### 2.2 Thread Scheduling & CPU Affinity (Assignment II)
+* **POSIX Threads & CPU Affinity:** Used `pthreads` to spawn multiple worker threads and utilized `sched_setaffinity` to bind them to a specific CPU core (Core 0), forcing direct contention to observe scheduling behaviors.
+* **Scheduling Policies & Priorities:** Configured thread attributes (`pthread_attr_t`) to test and observe the differences between the Completely Fair Scheduler (`SCHED_OTHER`/`SCHED_NORMAL`) and real-time scheduling (`SCHED_FIFO`).
+* **Precise CPU-Time Measurement:** Implemented an accurate CPU-bound busy-wait mechanism using `clock_gettime()` with `CLOCK_THREAD_CPUTIME_ID`, successfully calculating pure execution time while excluding preempted time.
+* **Real-Time Bandwidth Control:** Understood the impact of Linux's real-time throttling (`/proc/sys/kernel/sched_rt_runtime_us`) and how to bypass it to observe uninterrupted FIFO thread execution.
 
-### II. Multi-threaded Scheduling Demonstration
-Developed a tool to observe how the Linux kernel prioritizes tasks under different scheduling policies.
-
-* **Technologies**: `pthread` concurrency, `sched_setaffinity` for CPU pinning, `CLOCK_THREAD_CPUTIME_ID` for precise execution tracking.
-* **Key Observations**:
-    * **Priority Preemption**: Verified that high-priority `SCHED_FIFO` threads completely preempt lower-priority tasks.
-    * **Bandwidth Control**: Analyzed how `kernel.sched_rt_runtime_us` prevents real-time tasks from causing system-wide hangs.
-    * **Busy-Waiting**: Implemented a logic that calculates "N seconds of actual CPU time," excluding time spent while the thread was preempted.
-
-### III. kfetch: System Information Kernel Module
-Developed `kfetch`, a character device driver that exposes system telemetry through a graphical ASCII interface.
-
-* **Technologies**: `cdev` registration, `device_create` for automatic node generation, `private_data` for session isolation.
-* **Highlights**:
-    * **Session Management**: Used `file->private_data` to ensure that info-masks are isolated per process, preventing data pollution.
-    * **Tool Compatibility**: Correctly handled `loff_t *ppos` (offset) to ensure full compatibility with standard Unix tools like `cat` and `head`.
-    * **Concurrency**: Implemented mutex locks to protect global variables from race conditions.
+### 2.3 Kernel Modules & Device Drivers (Assignment III)
+* **Linux Kernel Modules (LKM):** Developed a dynamic kernel module (`kfetch`) that can be loaded and unloaded at runtime without recompiling the entire kernel.
+* **Character Device Registration:** Implemented standard device driver initialization utilizing `alloc_chrdev_region`, `cdev_init`, `cdev_add`, `class_create`, and `device_create` for automatic node generation in `/dev/`.
+* **File Operations (`file_operations`):** Mapped standard user-space system calls (`open`, `read`, `write`, `close`) to custom kernel functions (`kfetch_open`, `kfetch_read`, etc.). 
+* **Concurrency & State Management:** Solved race conditions using `mutex_lock_interruptible` and achieved proper per-process state isolation by utilizing the `file->private_data` pointer.
+* **Standard Tool Compatibility:** Managed file offsets (`loff_t *ppos`) correctly within the `read` function, ensuring the driver responds accurately to standard Linux CLI tools like `cat`.
 
 ---
 
-## 🚀 Quick Start
+## 3. Core Competencies Acquired
 
-### Prerequisites
-* Docker (with cross-riscv64 toolchain)
-* QEMU (riscv64-system)
+| Skill Category | Specific Techniques Learned |
+| :--- | :--- |
+| **Kernel Programming** | `copy_from_user`/`copy_to_user`, `kmalloc`/`kfree`, `struct list_head` manipulation, syscall table modification. |
+| **Process & Thread Management** | `pthreads`, `pthread_barrier_t`, `sched_setaffinity`, `SCHED_FIFO`, `CLOCK_THREAD_CPUTIME_ID`. |
+| **Device Driver Development** | Character devices (`cdev`), dynamic major numbers, `struct file_operations`, `file->private_data`, managing `loff_t *ppos`. |
+| **Concurrency Control** | Identifying critical sections in kernel space, utilizing `mutex_lock_interruptible` to prevent race conditions. |
+| **Build Systems & Emulation** | Cross-compiling for RISC-V, QEMU headless booting, static vs. dynamic linking (`-static`), Makefile configuration. |
 
-### Build the Kernel
-```bash
-export ARCH=riscv
-export CROSS_COMPILE=riscv64-linux-gnu-
-make defconfig
-make -j$(nproc)
+---
+
+## 4. Conclusion
+This sequence of assignments provided a rigorous, practical understanding of operating system design. By moving progressively from static kernel compilation to dynamic thread scheduling, and finally to writing loadable device drivers, we developed the crucial ability to safely and efficiently interact with hardware and system resources from both sides of the user-kernel divide.
