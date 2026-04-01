@@ -1,5 +1,7 @@
 # Assignment II: Scheduling Policy Demonstration Program
 
+lab instructions:https://hackmd.io/@seco1024/Bk48CgNClg
+
 ---
 
 ## 1. Implementation
