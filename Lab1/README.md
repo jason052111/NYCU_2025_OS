@@ -1,5 +1,7 @@
 # Assignment I: Compiling a Custom Linux Kernel & Implementing New System Calls
 
+lab instructions : https://hackmd.io/@fLANt9b6TbWx5I3lYKkBow/S17gcgmKxl
+
 ---
 
 ## 1. Compiling a Custom Linux Kernel
