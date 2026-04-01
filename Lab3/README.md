@@ -1,5 +1,7 @@
 # Assignment III: System Information Fetching Kernel Module
 
+Lab instructions : https://hackmd.io/@seco1024/BJYIDp7lZx
+
 ---
 
 ## 1. Program Description
